@@ -22,7 +22,7 @@ defmodule ExJSONPointer do
   2
   ```
 
-  or a URI Fragment Identifier:
+  or a URI fragment identifier:
 
   ```elixir
   iex(1)> ExJSONPointer.evaluate(%{"a" => %{"b" => %{"c" => "hello"}}}, "#/a/b/c")

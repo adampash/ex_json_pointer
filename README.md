@@ -22,7 +22,7 @@ iex(6)> ExJSONPointer.evaluate(%{"a" => [%{"b" => %{"c" => [1, 2]}}, 2, 3]}, "/a
 2
 ```
 
-or a URI Fragment Identifier:
+or a URI fragment identifier:
 
 ```elixir
 iex(1)> ExJSONPointer.evaluate(%{"a" => %{"b" => %{"c" => "hello"}}}, "#/a/b/c")
