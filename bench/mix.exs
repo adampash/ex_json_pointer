@@ -20,7 +20,7 @@ defmodule Bench.MixProject do
   defp deps do
     [
       {:benchee, "~> 1.0", only: :dev, runtime: false},
-      {:odgn_json_pointer, "~> 3.0.1"},
+      {:odgn_json_pointer, "~> 3.1"},
       #{:json_pointer, "~> 0.1"},
       {:ex_json_pointer, path: "../", override: true},
     ]
