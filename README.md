@@ -1,5 +1,9 @@
 # ExJSONPointer
 
+[![hex.pm version](https://img.shields.io/hexpm/v/ex_json_pointer.svg?v=1)](https://hex.pm/packages/ex_json_pointer)
+
+<!-- MDOC !-->
+
 An Elixir implementation of [RFC 6901](https://www.rfc-editor.org/rfc/rfc6901.html) JSON Pointer for locating specific values within JSON documents.
 
 ## Usage

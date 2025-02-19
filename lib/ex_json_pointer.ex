@@ -1,6 +1,8 @@
 defmodule ExJSONPointer do
   @external_resource readme = Path.join([__DIR__, "../README.md"])
   @moduledoc File.read!(readme)
+             |> String.split("<!-- MDOC !-->")
+             |> Enum.fetch!(1)
 
   @typedoc """
   The JSON document to be processed, must be a map.
