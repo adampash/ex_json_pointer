@@ -16,7 +16,7 @@ data = %{
 
 Benchee.run(
   %{
-    ":ex_json_pointer implementions(self)" => fn -> ExJSONPointer.evaluate(data, "/a/b2/c2/0") end,
+    ":ex_json_pointer implementions(self)" => fn -> ExJSONPointer.resolve(data, "/a/b2/c2/0") end,
     ":odgn_json_pointer implementions" => fn -> JSONPointer.get(data, "/a/b2/c2/0") end,
     #":json_pointer implementions" => fn -> JSONPointer.resolve(data, "/a/b2/c2/0") end,
   },
