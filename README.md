@@ -69,7 +69,7 @@ nil
 
 ```
 
-Empty Reference token cases:
+Some cases that a JSON pointer has some empty reference tokens, and link a `$ref` [test case](https://github.com/json-schema-org/JSON-Schema-Test-Suite/blob/main/tests/draft2020-12/ref.json#L1023) from JSON Schema Test Suite(draft 2020-12) for reference.
 
 ```elixir
 iex> ExJSONPointer.resolve(%{"" => %{"" => 1}}, "/")
