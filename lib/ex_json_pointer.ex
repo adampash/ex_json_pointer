@@ -16,9 +16,9 @@ defmodule ExJSONPointer do
 
   @typedoc """
   The result of resolving a JSON Pointer:
-  - nil: when the pointer does not resolve to a value
-  - term(): the resolved value
-  - {:error, String.t()}: when there is an error in pointer syntax
+  * `nil` - when the pointer does not resolve to a value
+  * `term()` - the resolved value
+  * `{:error, String.t()}` - when there is an error in pointer syntax
   """
   @type result :: nil | term() | {:error, String.t()}
 

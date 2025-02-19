@@ -1,13 +1,13 @@
 defmodule ExJSONPointer.MixProject do
   use Mix.Project
 
-  @source_url "https://github.com/elixir-oasis/ex_json_pointer"
+  @source_url "https://github.com/xinz/ex_json_pointer"
 
   def project do
     [
       app: :ex_json_pointer,
       version: "0.1.0",
-      elixir: "~> 1.6",
+      elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       docs: docs(),

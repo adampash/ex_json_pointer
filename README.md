@@ -1,7 +1,6 @@
 # ExJSONPointer
 
-An implementation of [RFC 6901](https://www.rfc-editor.org/rfc/rfc6901.html) that JSON pointer defines a string syntax for
-identifying the specific value within a JSON document.
+An Elixir implementation of [RFC 6901](https://www.rfc-editor.org/rfc/rfc6901.html) JSON Pointer for locating specific values within JSON documents.
 
 ## Usage
 
