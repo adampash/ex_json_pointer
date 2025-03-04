@@ -56,17 +56,16 @@ Some cases that a JSON pointer that references a nonexistent value:
 
 ```elixir
 iex> ExJSONPointer.resolve(%{"a" => %{"b" => %{"c" => "hello"}}}, "/a/b/d")
-nil
+{:error, "not found"}
 
 iex> ExJSONPointer.resolve(%{"a" => %{"b" => %{"c" => [1, 2, 3]}}}, "/a/b/c/4")
-nil
+{:error, "not found"}
 
 iex> ExJSONPointer.resolve(%{"a" => %{"b" => %{"c" => "hello"}}}, "#/a/b/d")
-nil
+{:error, "not found"}
 
 iex> ExJSONPointer.resolve(%{"a" => %{"b" => %{"c" => [1, 2, 3]}}}, "#/a/b/c/4")
-nil
-
+{:error, "not found"}
 ```
 
 Some cases that a JSON pointer has some empty reference tokens, and link a `$ref` [test case](https://github.com/json-schema-org/JSON-Schema-Test-Suite/blob/main/tests/draft2020-12/ref.json#L1023) from JSON Schema Test Suite(draft 2020-12) for reference.
@@ -85,19 +84,17 @@ iex> ExJSONPointer.resolve(%{"" => %{"" => 1, "b" => %{"" => 2}}}, "//b/")
 2
 
 iex> ExJSONPointer.resolve(%{"" => %{"" => 1, "b" => %{"" => 2}}}, "//b///")
-nil
+{:error, "not found"}
 ```
 
 Invalid JSON pointer syntax:
 
 ```elixir
 iex> ExJSONPointer.resolve(%{"a" =>%{"b" => %{"c" => [1, 2, 3]}}}, "a/b")
-{:error,
-  "invalid JSON pointer syntax that not represented starts with `#` or `/`"}
+{:error, "invalid pointer syntax"}
 
 iex> ExJSONPointer.resolve(%{"a" =>%{"b" => %{"c" => [1, 2, 3]}}}, "##/a")
-{:error,
-  "invalid URI fragment identifier"}
+{:error, "invalid pointer syntax"}
 
 ```
 

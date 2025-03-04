@@ -55,9 +55,9 @@ defmodule ExJSONPointerTest do
     end
 
     test "nesting map" do
-      assert ExJSONPointer.resolve(@nesting_data, "/a/b/4") == nil
-      assert ExJSONPointer.resolve(@nesting_data, "/a/b/c/4") == nil
-      assert ExJSONPointer.resolve(@nesting_data, "/a/b/c/unknown") == nil
+      assert ExJSONPointer.resolve(@nesting_data, "/a/b/4") == {:error, "not found"}
+      assert ExJSONPointer.resolve(@nesting_data, "/a/b/c/4") == {:error, "not found"}
+      assert ExJSONPointer.resolve(@nesting_data, "/a/b/c/unknown") == {:error, "not found"}
       assert ExJSONPointer.resolve(@nesting_data, "/a/b/c/0") == 1
 
       assert ExJSONPointer.resolve(@nesting_data, "/a/b") == %{
@@ -98,8 +98,8 @@ defmodule ExJSONPointerTest do
     end
 
     test "nesting map" do
-      assert ExJSONPointer.resolve(@nesting_data, "#/a/b/4") == nil
-      assert ExJSONPointer.resolve(@nesting_data, "#/a/b/c/4") == nil
+      assert ExJSONPointer.resolve(@nesting_data, "#/a/b/4") == {:error, "not found"}
+      assert ExJSONPointer.resolve(@nesting_data, "#/a/b/c/4") == {:error, "not found"}
       assert ExJSONPointer.resolve(@nesting_data, "#/a/b/c/0") == 1
 
       assert ExJSONPointer.resolve(@nesting_data, "#/a/b") == %{
@@ -113,7 +113,7 @@ defmodule ExJSONPointerTest do
              }
 
       assert ExJSONPointer.resolve(@nesting_data, "##/a/b") == {
-               :error, "invalid URI fragment identifier"
+               :error, "invalid pointer syntax"
              }
 
       assert ExJSONPointer.resolve(@nesting_data, "#//a/b") == %{
@@ -134,15 +134,15 @@ defmodule ExJSONPointerTest do
 
   test "invalid syntax" do
     assert ExJSONPointer.resolve(@nesting_data, "a/b") ==
-             {:error, "invalid JSON pointer syntax that not represented starts with `#` or `/`"}
+             {:error, "invalid pointer syntax"}
   end
 
   test "the ref token is exceeded the index of array" do
     assert ExJSONPointer.resolve(%{"a" => %{"b" => %{"c" => [1, 2, 3]}}}, "/a/b/c/0") == 1
-    assert ExJSONPointer.resolve(%{"a" => %{"b" => %{"c" => [1, 2, 3]}}}, "/a/b/c/4") == nil
+    assert ExJSONPointer.resolve(%{"a" => %{"b" => %{"c" => [1, 2, 3]}}}, "/a/b/c/4") == {:error, "not found"}
   end
 
   test "the ref token size is exceeded the depth of input json" do
-    assert ExJSONPointer.resolve(%{"a" => %{"b" => %{"c" => [1, 2, 3]}}}, "/a/b/c///") == nil
+    assert ExJSONPointer.resolve(%{"a" => %{"b" => %{"c" => [1, 2, 3]}}}, "/a/b/c///") == {:error, "not found"}
   end
 end

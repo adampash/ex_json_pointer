@@ -4,6 +4,9 @@ defmodule ExJSONPointer do
              |> String.split("<!-- MDOC !-->")
              |> Enum.fetch!(1)
 
+  @error_not_found {:error, "not found"}
+  @error_invalid_syntax {:error, "invalid pointer syntax"}
+
   @typedoc """
   The JSON document to be processed, must be a map.
   """
@@ -18,11 +21,10 @@ defmodule ExJSONPointer do
 
   @typedoc """
   The result of resolving a JSON Pointer:
-  * `nil` - when the pointer does not resolve to a value
   * `term()` - the resolved value
-  * `{:error, String.t()}` - when there is an error in pointer syntax
+  * `{:error, String.t()}` - when there is an error in pointer syntax or value not found
   """
-  @type result :: nil | term() | {:error, String.t()}
+  @type result :: term() | {:error, String.t()}
 
   @doc """
   Resolve the JSON document with the given JSON Pointer to find the accompanying value.
@@ -37,6 +39,10 @@ defmodule ExJSONPointer do
       iex> doc = %{"foo" => %{"bar" => "baz"}}
       iex> ExJSONPointer.resolve(doc, "/foo/bar")
       "baz"
+      iex> ExJSONPointer.resolve(doc, "/foo/baz")
+      {:error, "not found"}
+      iex> ExJSONPointer.resolve(doc, "##foo")
+      {:error, "invalid pointer syntax"}
   """
   @spec resolve(document, pointer) :: result
   def resolve(document, ""), do: document
@@ -66,7 +72,7 @@ defmodule ExJSONPointer do
   end
 
   defp do_resolve(_document, _pointer) do
-    {:error, "invalid JSON pointer syntax that not represented starts with `#` or `/`"}
+    @error_invalid_syntax
   end
 
   defp resolve_json_str(document, ""), do: document
@@ -80,7 +86,7 @@ defmodule ExJSONPointer do
       {:ok, uri} ->
         start_process(document, uri.fragment, "uri_fragment")
       {:error, _} ->
-        {:error, "invalid URI fragment identifier"}
+        @error_invalid_syntax
     end
   end
 
@@ -107,9 +113,11 @@ defmodule ExJSONPointer do
       process(value, rest, mode)
     else
       {_, other} when other != "" ->
-        nil
+        @error_not_found
       :error ->
-        nil
+        @error_not_found
+      nil ->
+        @error_not_found
       value ->
         value
     end
@@ -118,20 +126,20 @@ defmodule ExJSONPointer do
   # Handle object access for JSON String Representation
   defp process(document, [ref_token | rest], "json_str" = mode) when is_map(document) do
     inner = Map.get(document, unescape(ref_token))
-    if inner != nil, do: process(inner, rest, mode), else: nil
+    if inner != nil, do: process(inner, rest, mode), else: @error_not_found
   end
 
   # Handle object access for URI Fragment Identifier Representation
   defp process(document, [ref_token | rest], "uri_fragment" = mode) when is_map(document) do
     decoded_ref_token = ref_token |> unescape() |> URI.decode_www_form()
     inner = Map.get(document, decoded_ref_token)
-    if inner != nil, do: process(inner, rest, mode), else: nil
+    if inner != nil, do: process(inner, rest, mode), else: @error_not_found
   end
 
   # Handle case when we've reached a leaf node but still have reference tokens
   defp process(value, _ref_tokens, _mode)
     when not is_list(value)
     when not is_map(value) do
-    nil
+    @error_not_found
   end
 end
