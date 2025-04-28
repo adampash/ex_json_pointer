@@ -4,7 +4,7 @@
 
 <!-- MDOC !-->
 
-An Elixir implementation of [RFC 6901](https://www.rfc-editor.org/rfc/rfc6901.html) JSON Pointer for locating specific values within JSON documents.
+An Elixir implementation of [RFC 6901](https://www.rfc-editor.org/rfc/rfc6901.html) JSON Pointer for locating specific values within JSON documents, and also supports [Relative JSON Pointer](https://datatracker.ietf.org/doc/html/draft-bhutton-relative-json-pointer-00) of the JSON Schema Specification draft-2020-12.
 
 ## Usage
 
@@ -96,6 +96,41 @@ iex> ExJSONPointer.resolve(%{"a" =>%{"b" => %{"c" => [1, 2, 3]}}}, "a/b")
 iex> ExJSONPointer.resolve(%{"a" =>%{"b" => %{"c" => [1, 2, 3]}}}, "##/a")
 {:error, "invalid JSON pointer syntax"}
 
+```
+
+## Relative JSON Pointer
+
+This library also supports [Relative JSON Pointer](https://datatracker.ietf.org/doc/html/draft-bhutton-relative-json-pointer-00) of the JSON Schema Specification draft-2020-12 which allows you to reference values relative to a specific location within a JSON document.
+
+A relative JSON pointer consists of:
+- A non-negative integer (prefix) that indicates how many levels up to traverse
+- An optional index manipulation (+N or -N) for array elements
+- An optional JSON pointer to navigate from the referenced location
+
+```elixir
+# Sample data
+iex> data = %{"foo" => ["bar", "baz"], "highly" => %{"nested" => %{"objects" => true}}}
+iex> ExJSONPointer.resolve(data, "/foo/1", "0") # Get the current value (0 levels up)
+"baz"
+# Get the parent array and access its first element (1 level up, then to index 0)
+iex> ExJSONPointer.resolve(data, "/foo/1", "1/0")
+"bar"
+# Get the previous element in the array (current level, index - 1)
+iex> ExJSONPointer.resolve(data, "/foo/1", "0-1")
+"bar"
+# Go up to the root and access a nested property
+iex> ExJSONPointer.resolve(data, "/foo/1", "2/highly/nested/objects")
+true
+# Get the index of the current element in its array
+iex> ExJSONPointer.resolve(data, "/foo/1", "0#")
+1
+
+# Get the key name of a property in an object
+iex> data2 = %{"features" => [%{"name" => "environment friendly", "url" => "http://example.com"}]}
+iex> ExJSONPointer.resolve(data2, "/features/0/url", "1/name")
+"environment friendly"
+iex> ExJSONPointer.resolve(data2, "/features/0/url", "2#")
+"features"
 ```
 
 Please see the test cases for more examples.

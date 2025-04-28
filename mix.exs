@@ -24,7 +24,7 @@ defmodule ExJSONPointer.MixProject do
   end
 
   defp description do
-    "An Elixir implemention of RFC 6901 JSON pointer."
+    "An Elixir implementation of RFC 6901 JSON Pointer and Relative JSON Pointer."
   end
 
   defp deps() do
