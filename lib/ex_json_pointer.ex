@@ -44,4 +44,5 @@ defmodule ExJSONPointer do
   @spec resolve(document, pointer) :: result
   defdelegate resolve(document, pointer), to: __MODULE__.RFC6901
 
+  defdelegate resolve(document, start_json_point, relative), to: __MODULE__.Relative
 end
