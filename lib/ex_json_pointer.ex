@@ -76,4 +76,39 @@ defmodule ExJSONPointer do
   """
   @spec resolve(document, pointer, String.t()) :: result
   defdelegate resolve(document, start_json_pointer, relative), to: __MODULE__.Relative
+
+  @doc """
+  Resolve a JSON pointer while accumulating state during traversal.
+
+  This function allows you to track the traversal path and accumulate values as the JSON pointer
+  is being resolved. It is designed to be useful for implementing operations that need context
+  about the traversal path, such as relative JSON pointers.
+
+  ## Parameters
+  - `document`: The JSON document to be processed
+  - `pointer`: A JSON pointer that identifies the location within the document
+  - `acc`: An initial accumulator value that will be passed to the resolve function
+  - `resolve_fun`: A function that receives the current value, reference token, and accumulated state
+    and returns either `{:cont, {new_value, new_acc}}` to continue or `{:halt, result}` to stop traversal
+
+  The `resolve_fun` receives three arguments:
+  - The current value at the reference token
+  - The current reference token being processed
+  - A tuple containing the processing document and the current accumulator
+
+  ## Examples
+
+      iex> data = %{"a" => %{"b" => %{"c" => [10, 20, 30]}}}
+      iex> init_acc = %{}
+      iex> fun = fn current, ref_token, {_document, acc} ->
+      ...>   {:cont, {current, Map.put(acc, ref_token, current)}}
+      ...> end
+      iex> {value, result} = ExJSONPointer.resolve_while(data, "/a/b/c/0", init_acc, fun)
+      iex> value
+      10
+      iex> result["c"]
+      [10, 20, 30]
+  """
+  @spec resolve_while(document, pointer, acc, (term, String.t(), {document, acc} -> {:cont, {term, acc}} | {:halt, term})) :: {term, acc} | {:error, String.t()} when acc: term()
+  defdelegate resolve_while(document, pointer, acc, resolve_fun), to: __MODULE__.RFC6901
 end
