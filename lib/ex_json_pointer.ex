@@ -4,9 +4,6 @@ defmodule ExJSONPointer do
              |> String.split("<!-- MDOC !-->")
              |> Enum.fetch!(1)
 
-  @error_not_found {:error, "not found"}
-  @error_invalid_syntax {:error, "invalid pointer syntax"}
-
   @typedoc """
   The JSON document to be processed, must be a map.
   """
@@ -42,104 +39,9 @@ defmodule ExJSONPointer do
       iex> ExJSONPointer.resolve(doc, "/foo/baz")
       {:error, "not found"}
       iex> ExJSONPointer.resolve(doc, "##foo")
-      {:error, "invalid pointer syntax"}
+      {:error, "invalid JSON pointer syntax"}
   """
   @spec resolve(document, pointer) :: result
-  def resolve(document, ""), do: document
-  def resolve(document, "#"), do: document
+  defdelegate resolve(document, pointer), to: __MODULE__.RFC6901
 
-  def resolve(document, pointer)
-      when is_map(document) and is_bitstring(pointer) do
-    do_resolve(document, pointer)
-  end
-
-  # Unescapes the reference token by replacing ~1 with / and ~0 with ~
-  defp unescape(pointer) do
-    String.replace(pointer, ["~1", "~0"], fn
-      "~1" -> "/"
-      "~0" -> "~"
-    end)
-  end
-
-  defp do_resolve(document, "/" <> _pointer_str = pointer) do
-    # JSON String Representation
-    resolve_json_str(document, pointer)
-  end
-
-  defp do_resolve(document, "#" <> _pointer_str = pointer) do
-    # URI Fragment Identifier Representation
-    resolve_uri_fragment(document, pointer)
-  end
-
-  defp do_resolve(_document, _pointer) do
-    @error_invalid_syntax
-  end
-
-  defp resolve_json_str(document, ""), do: document
-  defp resolve_json_str(document, "/" <> _ = pointer_str) do
-    start_process(document, pointer_str, "json_str")
-  end
-
-  defp resolve_uri_fragment(document, "#"), do: document
-  defp resolve_uri_fragment(document, "#" <> _ = pointer_str) do
-    case URI.new(pointer_str) do
-      {:ok, uri} ->
-        start_process(document, uri.fragment, "uri_fragment")
-      {:error, _} ->
-        @error_invalid_syntax
-    end
-  end
-
-  # Starts processing the pointer by splitting it into reference tokens
-  defp start_process(document, "", _mode), do: document
-  defp start_process(document, input, mode) when is_bitstring(input) do
-    case String.split(input, "/") do
-      ["" | ref_tokens] ->
-        process(document, ref_tokens, mode)
-      other ->
-        process(document, other, mode)
-    end
-  end
-
-  # Process reference tokens recursively to find the target value
-  defp process(value, [], _mode) do
-    value
-  end
-
-  # Handle array access with numeric indices
-  defp process(document, [ref_token | rest], mode) when is_list(document) do
-    with {index, ""} <- Integer.parse(ref_token),
-         value when is_map(value) or is_list(value) <- Enum.at(document, index) do
-      process(value, rest, mode)
-    else
-      {_, other} when other != "" ->
-        @error_not_found
-      :error ->
-        @error_not_found
-      nil ->
-        @error_not_found
-      value ->
-        value
-    end
-  end
-
-  # Handle object access for JSON String Representation
-  defp process(document, [ref_token | rest], "json_str" = mode) when is_map(document) do
-    inner = Map.get(document, unescape(ref_token))
-    if inner != nil, do: process(inner, rest, mode), else: @error_not_found
-  end
-
-  # Handle object access for URI Fragment Identifier Representation
-  defp process(document, [ref_token | rest], "uri_fragment" = mode) when is_map(document) do
-    decoded_ref_token = ref_token |> unescape() |> URI.decode_www_form()
-    inner = Map.get(document, decoded_ref_token)
-    if inner != nil, do: process(inner, rest, mode), else: @error_not_found
-  end
-
-  # Handle case when we've reached a leaf node but still have reference tokens
-  defp process(value, _ref_tokens, _mode)
-    when not is_list(value)
-    when not is_map(value) do
-    @error_not_found
-  end
 end

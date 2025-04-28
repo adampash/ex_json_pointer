@@ -91,10 +91,10 @@ Invalid JSON pointer syntax:
 
 ```elixir
 iex> ExJSONPointer.resolve(%{"a" =>%{"b" => %{"c" => [1, 2, 3]}}}, "a/b")
-{:error, "invalid pointer syntax"}
+{:error, "invalid JSON pointer syntax"}
 
 iex> ExJSONPointer.resolve(%{"a" =>%{"b" => %{"c" => [1, 2, 3]}}}, "##/a")
-{:error, "invalid pointer syntax"}
+{:error, "invalid JSON pointer syntax"}
 
 ```
 
