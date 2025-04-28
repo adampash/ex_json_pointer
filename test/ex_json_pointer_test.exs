@@ -55,6 +55,14 @@ defmodule ExJSONPointerTest do
     end
 
     test "nesting map" do
+      assert ExJSONPointer.resolve(@nesting_data, "/") == %{
+               "a" => %{
+                 "b" => %{
+                   "c" => [1, 2, 3],
+                   "" => "empty string from empty token"
+                 }
+               }
+             }
       assert ExJSONPointer.resolve(@nesting_data, "/a/b/4") == {:error, "not found"}
       assert ExJSONPointer.resolve(@nesting_data, "/a/b/c/4") == {:error, "not found"}
       assert ExJSONPointer.resolve(@nesting_data, "/a/b/c/unknown") == {:error, "not found"}
