@@ -4,8 +4,8 @@ defmodule ExJSONPointer.RFC6901 do
   @error_not_found {:error, "not found"}
   @error_invalid_syntax {:error, "invalid JSON pointer syntax"}
 
-  def resolve(document, ""), do: document
-  def resolve(document, "#"), do: document
+  def resolve(document, ""), do: {:ok, document}
+  def resolve(document, "#"), do: {:ok, document}
 
   def resolve(document, pointer)
       when is_map(document) and is_bitstring(pointer)
@@ -60,7 +60,7 @@ defmodule ExJSONPointer.RFC6901 do
   end
 
   defp process(value, []) do
-    value
+    {:ok, value}
   end
 
   defp process(document, [ref_token]) when is_list(document) and is_bitstring(ref_token) do
@@ -69,10 +69,11 @@ defmodule ExJSONPointer.RFC6901 do
       ref = String.slice(ref_token, 0..-2//1)
       index = String.to_integer(ref)
       value = Enum.at(document, index)
-      if value != nil, do: index, else: @error_not_found
+      if value != nil, do: {:ok, index}, else: @error_not_found
     else
       index = String.to_integer(ref_token)
-      Enum.at(document, index, @error_not_found)
+      value = Enum.at(document, index)
+      if value != nil, do: {:ok, value}, else: @error_not_found
     end
   rescue
     ArgumentError ->
@@ -87,7 +88,7 @@ defmodule ExJSONPointer.RFC6901 do
       nil ->
         @error_not_found
       value ->
-        value
+        {:ok, value}
     end
   rescue
     ArgumentError ->
@@ -98,9 +99,10 @@ defmodule ExJSONPointer.RFC6901 do
     if String.last(ref_token) == "#" do
       key = String.slice(ref_token, 0..-2//1)
       value = Map.get(document, unescape(key))
-      if value != nil, do: key, else: @error_not_found
+      if value != nil, do: {:ok, key}, else: @error_not_found
     else
-      Map.get(document, unescape(ref_token), @error_not_found)
+      value = Map.get(document, unescape(ref_token))
+      if value != nil, do: {:ok, value}, else: @error_not_found
     end
   end
 

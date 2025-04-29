@@ -55,11 +55,12 @@ defmodule ExJSONPointer.Relative do
     cond do
       is_list(target_level) ->
         index = Enum.at(ref_tokens, prefix)
-        if index != nil, do: String.to_integer(index), else: @error_not_found
+        if index != nil, do: {:ok, String.to_integer(index)}, else: @error_not_found
       target_level == nil ->
         @error_not_found
       true ->
-        Enum.at(ref_tokens, prefix, @error_not_found)
+        key = Enum.at(ref_tokens, prefix)
+        if key != nil, do: {:ok, key}, else: @error_not_found
     end
   end
 
@@ -67,7 +68,7 @@ defmodule ExJSONPointer.Relative do
     with {:ok, target_level} <- expect_level_of_prefix_as_list_when_with_index_manip(levels, prefix),
          {:ok, prefix_index} <- get_index_of_prefix(ref_tokens, prefix),
          {:ok, new_index} <- calculate_new_index(prefix_index, char, index) do
-      if Enum.at(target_level, new_index)!= nil, do: new_index, else: @error_not_found
+      if Enum.at(target_level, new_index)!= nil, do: {:ok, new_index}, else: @error_not_found
     else
       {:error, _} = error ->
         error
@@ -81,7 +82,7 @@ defmodule ExJSONPointer.Relative do
       value = Enum.at(target_level, new_index)
       cond do
         json_pointer == "" and value != nil ->
-          value
+          {:ok, value}
         json_pointer != "" and value != nil ->
           ExJSONPointer.RFC6901.resolve(value, json_pointer)
         true ->
@@ -94,7 +95,8 @@ defmodule ExJSONPointer.Relative do
   end
 
   defp find_value(%{"prefix" => prefix, "json_pointer" => ""}, value_of_start, levels, _ref_tokens) do
-    Enum.at([value_of_start | levels], prefix, @error_not_found)
+    value = Enum.at([value_of_start | levels], prefix)
+    if value != nil, do: {:ok, value}, else: @error_not_found
   end
 
   defp find_value(%{"prefix" => prefix, "json_pointer" => json_pointer}, value_of_start, levels, _ref_tokens) do

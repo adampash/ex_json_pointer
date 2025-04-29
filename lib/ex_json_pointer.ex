@@ -18,10 +18,10 @@ defmodule ExJSONPointer do
 
   @typedoc """
   The result of resolving a JSON Pointer:
-  * `term()` - the resolved value
+  * `{:ok, term()}` - the resolved value on success
   * `{:error, String.t()}` - when there is an error in pointer syntax or value not found
   """
-  @type result :: term() | {:error, String.t()}
+  @type result :: {:ok, term()} | {:error, String.t()}
 
   @doc """
   Resolve the JSON document with the given JSON Pointer to find the accompanying value.
@@ -35,7 +35,7 @@ defmodule ExJSONPointer do
 
       iex> doc = %{"foo" => %{"bar" => "baz"}}
       iex> ExJSONPointer.resolve(doc, "/foo/bar")
-      "baz"
+      {:ok, "baz"}
       iex> ExJSONPointer.resolve(doc, "/foo/baz")
       {:error, "not found"}
       iex> ExJSONPointer.resolve(doc, "##foo")
@@ -64,15 +64,15 @@ defmodule ExJSONPointer do
 
       iex> data = %{"foo" => ["bar", "baz"], "highly" => %{"nested" => %{"objects" => true}}}
       iex> ExJSONPointer.resolve(data, "/foo/1", "0")
-      "baz"
+      {:ok, "baz"}
       iex> ExJSONPointer.resolve(data, "/foo/1", "1/0")
-      "bar"
+      {:ok, "bar"}
       iex> ExJSONPointer.resolve(data, "/foo/1", "0-1")
-      "bar"
+      {:ok, "bar"}
       iex> ExJSONPointer.resolve(data, "/foo/1", "2/highly/nested/objects")
-      true
+      {:ok, true}
       iex> ExJSONPointer.resolve(data, "/foo/1", "0#")
-      1
+      {:ok, 1}
   """
   @spec resolve(document, pointer, String.t()) :: result
   defdelegate resolve(document, start_json_pointer, relative), to: __MODULE__.Relative

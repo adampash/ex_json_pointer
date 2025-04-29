@@ -12,44 +12,44 @@ The JSON pointer string syntax can be represented as a JSON string:
 
 ```elixir
 iex> ExJSONPointer.resolve(%{"a" => %{"b" => %{"c" => "hello"}}}, "/a/b/c")
-"hello"
+{:ok, "hello"}
 
 iex> ExJSONPointer.resolve(%{"a" => %{"b" => %{"c" => "hello"}}}, "/a/b")
-%{"c" => "hello"}
+{:ok, %{"c" => "hello"}}
 
 iex> ExJSONPointer.resolve(%{"a" => %{"b" => %{"c" => [1, 2, 3]}}}, "/a/b/c")
-[1, 2, 3]
+{:ok, [1, 2, 3]}
 
 iex> ExJSONPointer.resolve(%{"a" => %{"b" => %{"c" => [1, 2, 3]}}}, "/a/b/c/2")
-3
+{:ok, 3}
 
 iex> ExJSONPointer.resolve(%{"a" => [%{"b" => %{"c" => [1, 2]}}, 2, 3]}, "/a/2")
-3
+{:ok, 3}
 
 iex> ExJSONPointer.resolve(%{"a" => [%{"b" => %{"c" => [1, 2]}}, 2, 3]}, "/a/0/b/c/1")
-2
+{:ok, 2}
 ```
 
 or a URI fragment identifier:
 
 ```elixir
 iex> ExJSONPointer.resolve(%{"a" => %{"b" => %{"c" => "hello"}}}, "#/a/b/c")
-"hello"
+{:ok, "hello"}
 
 iex> ExJSONPointer.resolve(%{"a" => %{"b" => %{"c" => "hello"}}}, "#/a/b")
-%{"c" => "hello"}
+{:ok, %{"c" => "hello"}}
 
 iex> ExJSONPointer.resolve(%{"a" => %{"b" => %{"c" => [1, 2, 3]}}}, "#/a/b/c")
-[1, 2, 3]
+{:ok, [1, 2, 3]}
 
 iex> ExJSONPointer.resolve(%{"a" => %{"b" => %{"c" => [1, 2, 3]}}}, "#/a/b/c/2")
-3
+{:ok, 3}
 
 iex> ExJSONPointer.resolve(%{"a" => [%{"b" => %{"c" => [1, 2]}}, 2, 3]}, "#/a/2")
-3
+{:ok, 3}
 
 iex> ExJSONPointer.resolve(%{"a" => [%{"b" => %{"c" => [1, 2]}}, 2, 3]}, "#/a/0/b/c/1")
-2
+{:ok, 2}
 ```
 
 Some cases that a JSON pointer that references a nonexistent value:
@@ -72,16 +72,16 @@ Some cases that a JSON pointer has some empty reference tokens, and link a `$ref
 
 ```elixir
 iex> ExJSONPointer.resolve(%{"" => %{"" => 1}}, "/")
-%{"" => 1} 
+{:ok, %{"" => 1}}
 
 iex> ExJSONPointer.resolve(%{"" => %{"" => 1}}, "//")
-1
+{:ok, 1}
 
 iex> ExJSONPointer.resolve(%{"" => %{"" => 1, "b" => %{"" => 2}}}, "//b")
-%{"" => 2}
+{:ok, %{"" => 2}}
 
 iex> ExJSONPointer.resolve(%{"" => %{"" => 1, "b" => %{"" => 2}}}, "//b/")
-2
+{:ok, 2}
 
 iex> ExJSONPointer.resolve(%{"" => %{"" => 1, "b" => %{"" => 2}}}, "//b///")
 {:error, "not found"}
@@ -111,26 +111,26 @@ A relative JSON pointer consists of:
 # Sample data
 iex> data = %{"foo" => ["bar", "baz"], "highly" => %{"nested" => %{"objects" => true}}}
 iex> ExJSONPointer.resolve(data, "/foo/1", "0") # Get the current value (0 levels up)
-"baz"
+{:ok, "baz"}
 # Get the parent array and access its first element (1 level up, then to index 0)
 iex> ExJSONPointer.resolve(data, "/foo/1", "1/0")
-"bar"
+{:ok, "bar"}
 # Get the previous element in the array (current level, index - 1)
 iex> ExJSONPointer.resolve(data, "/foo/1", "0-1")
-"bar"
+{:ok, "bar"}
 # Go up to the root and access a nested property
 iex> ExJSONPointer.resolve(data, "/foo/1", "2/highly/nested/objects")
-true
+{:ok, true}
 # Get the index of the current element in its array
 iex> ExJSONPointer.resolve(data, "/foo/1", "0#")
-1
+{:ok, 1}
 
 # Get the key name of a property in an object
 iex> data2 = %{"features" => [%{"name" => "environment friendly", "url" => "http://example.com"}]}
 iex> ExJSONPointer.resolve(data2, "/features/0/url", "1/name")
-"environment friendly"
+{:ok, "environment friendly"}
 iex> ExJSONPointer.resolve(data2, "/features/0/url", "2#")
-"features"
+{:ok, "features"}
 ```
 
 Please see the test cases for more examples.
